@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import dan.tp2021.cuentacorriente.domain.Pago;
 
-@Service
+
 public interface PagoService {
 	ResponseEntity<Pago> savePago(Pago p);
 	ResponseEntity<Pago> deletePagoById(Integer idPago);

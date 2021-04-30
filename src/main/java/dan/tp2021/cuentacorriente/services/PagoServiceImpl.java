@@ -7,14 +7,17 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
+import dan.tp2021.cuentacorriente.dao.PagoInMemoryRepository;
 import dan.tp2021.cuentacorriente.domain.Pago;
 import frsf.isi.dan.InMemoryRepository;
 
+@Service
 public class PagoServiceImpl implements PagoService {
 
 	@Autowired
-	InMemoryRepository<Pago> inMemoryRepository;
+	PagoInMemoryRepository inMemoryRepository;
 
 	@Override
 	public ResponseEntity<Pago> savePago(Pago p) {
