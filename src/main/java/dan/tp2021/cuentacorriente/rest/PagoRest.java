@@ -2,6 +2,7 @@ package dan.tp2021.cuentacorriente.rest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,8 +40,10 @@ public class PagoRest {
 			@ApiResponse(code = 401, message = "Operacion No autorizada"),
 			@ApiResponse(code = 403, message = "Operacion Prohibida") })
 	public ResponseEntity<Pago> crearNuevoPago(@RequestBody Pago nuevoPago) {
-
+		
+		//En nuevoPago viene un atributo "type" que utiliza Jackson para poder instancia la clase Abstacta MedioPago
 		if (nuevoPago != null && nuevoPago.getCliente() != null && nuevoPago.getMedio() != null) {
+			
 			try {
 				return pagoServiceImpl.savePago(nuevoPago);
 			} catch (Exception e) {
@@ -96,44 +99,51 @@ public class PagoRest {
 	}
 
 	@GetMapping()
-	@ApiOperation(value = "Obtener todos los pagos")
+	@ApiOperation(value = "Obtener pagos segun diferentes criterios: rango de fechas, id de cliente, cuit de cliente")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Pagos obtenidos correctamente"),
 			@ApiResponse(code = 401, message = "Operacion No autorizada"),
 			@ApiResponse(code = 403, message = "Operacion Prohibida"),
 			@ApiResponse(code = 404, message = "El ID no existe") })
-	public ResponseEntity<List<Pago>> getListaPagos() {
+	public ResponseEntity<List<Pago>> getListaPagos(@RequestParam(required = false, defaultValue = "0", name = "idCliente") Integer id,
+													@RequestParam(required = false, defaultValue = "", name = "cuitCliente") String cuit,
+													@RequestParam(required = false, defaultValue = "", name = "fechaDesde") String fechaDesde,
+													@RequestParam(required = false, defaultValue = "", name = "fechaHasta") String fechaHasta) {
 
-		try {
-			return pagoServiceImpl.getListaPagos();
-		}
-		catch (Exception e){
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
-
-	}
-	@GetMapping("/datosClientes")
-	@ApiOperation(value = "Obtener pagos por id cliente o cuit cliente")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Pagos obtenidos correctamente"),
-			@ApiResponse(code = 401, message = "Operacion No autorizada"),
-			@ApiResponse(code = 403, message = "Operacion Prohibida"),
-			@ApiResponse(code = 404, message = "El ID no existe") })
-	public ResponseEntity<List<Pago>> getPagosByIdOrCuitCliente(
-			@RequestParam(required = false, defaultValue = "0", name = "idCliente") Integer id,
-			@RequestParam(required = false, defaultValue = "", name = "cuitCliente") String cuit) {
-
+		//TODO ver como implementar, si es necesario, el filtrado por fechas.
 		List<Pago> resultado = new ArrayList<>();
 		try {
-			if (id > 0) {
-				resultado.addAll(pagoServiceImpl.getListaPagosByIdCliente(id).getBody());
+			ResponseEntity<List<Pago>> lista = pagoServiceImpl.getListaPagos();
+			if(lista.getStatusCode().equals(HttpStatus.OK)) {
+			if (id > 0 && !cuit.isBlank()){
+				
+					resultado =	lista.getBody().stream()
+								.filter(pago -> pago.getCliente().getId().equals(id) || pago.getCliente().getCuit().equals(cuit))
+								.collect(Collectors.toList());
+					return ResponseEntity.ok(resultado);
+				
 			}
-			if (!cuit.isEmpty()) {
-				resultado.addAll(pagoServiceImpl.getListaPagosByIdCliente(id).getBody());
+			else {
+				if(id>0) {
+					return pagoServiceImpl.getListaPagosByIdCliente(id);
+				}
+				else {
+					if(!cuit.isBlank()) {
+						return pagoServiceImpl.getListaPagosByCuitCliente(cuit);
+					}
+					else {
+						return lista;
+					}
+				}
 			}
-			return ResponseEntity.ok(resultado);
+			}
+			else {
+				return ResponseEntity.status(lista.getStatusCode()).build();
+			}
 		}
 		catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 		
 	}
+	
 }
