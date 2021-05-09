@@ -2,6 +2,9 @@ package dan.tp2021.cuentacorriente.domain;
 
 import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("cheque")
 public class Cheque extends MedioPago {
 
 	private Integer nroCheque;
