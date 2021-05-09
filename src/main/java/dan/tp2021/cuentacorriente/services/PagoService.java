@@ -2,17 +2,18 @@ package dan.tp2021.cuentacorriente.services;
 
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
 import dan.tp2021.cuentacorriente.domain.Pago;
 
 
 public interface PagoService {
-	ResponseEntity<Pago> savePago(Pago p);
-	ResponseEntity<Pago> deletePagoById(Integer idPago);
-	ResponseEntity<Pago> getPagoById(Integer idPago);
-	ResponseEntity<List<Pago>> getListaPagos();
-	ResponseEntity<List<Pago>> getListaPagosByIdCliente(Integer idCliente); 
-	ResponseEntity<List<Pago>> getListaPagosByCuitCliente(String cuitCliente); 
+
+	class PagoException extends Exception { PagoException(String message){super(message);}}
+	class PagoNotFoundException extends PagoException { PagoNotFoundException(String message){super(message);}}
+
+	Pago savePago(Pago p) throws PagoException;
+	Pago deletePagoById(Integer idPago) throws PagoException;
+	Pago getPagoById(Integer idPago) throws PagoException;
+	List<Pago> getListaPagos() throws PagoException;
+	List<Pago> getListaPagosByIdCliente(Integer idCliente) throws PagoException;
+	List<Pago> getListaPagosByCuitCliente(String cuitCliente) throws PagoException;
 }
