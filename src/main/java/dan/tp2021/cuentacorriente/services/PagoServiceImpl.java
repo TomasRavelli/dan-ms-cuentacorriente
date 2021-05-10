@@ -3,10 +3,9 @@ package dan.tp2021.cuentacorriente.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import dan.tp2021.cuentacorriente.dao.PagoInMemoryRepository;
@@ -100,6 +99,51 @@ public class PagoServiceImpl implements PagoService {
 			throw new PagoException("Error al obtener la lista de pagos para el cuit de cliente " + cuit + ": " + e.getMessage());
 		}
 		return resultado;
+	}
+
+	@Override
+	public List<Pago> getPagosByParams(Integer id, String cuit) throws PagoNotFoundException, PagoException {
+		
+		List<Pago> resultado = new ArrayList<>();
+		if (id > 0 && !cuit.isBlank()){
+			List<Pago> lista = this.getListaPagos();
+			resultado =	lista.stream()
+						.filter(pago -> pago.getCliente().getId().equals(id) || pago.getCliente().getCuit().equals(cuit))
+						.collect(Collectors.toList());
+			if(!resultado.isEmpty()) {
+			
+				return (resultado);
+			}
+			
+			throw new PagoNotFoundException("No se encontraron pagos que cumplan con estos criterios.");
+			
+		}
+
+		if(id > 0) {
+			resultado = this.getListaPagosByIdCliente(id);
+			if(!resultado.isEmpty()) {
+				return (resultado);
+			}
+			throw new PagoNotFoundException("No se encontraron pagos que cumplan con estos criterios.");
+		}
+
+		if(!cuit.isBlank()) {
+			resultado = this.getListaPagosByCuitCliente(cuit);
+			
+			if(!resultado.isEmpty()) {
+				return (resultado);
+			}			
+			throw new PagoNotFoundException("No se encontraron pagos que cumplan con estos criterios.");
+		}
+
+		resultado = this.getListaPagos();
+		
+		if(!resultado.isEmpty()) {
+			return resultado;
+		}
+		
+		throw new PagoNotFoundException("No se encontraron pagos que cumplan con estos criterios.");
+
 	}
 
 }

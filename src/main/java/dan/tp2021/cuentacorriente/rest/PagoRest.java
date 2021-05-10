@@ -2,8 +2,6 @@ package dan.tp2021.cuentacorriente.rest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import dan.tp2021.cuentacorriente.domain.Pago;
 import dan.tp2021.cuentacorriente.services.PagoService;
+import dan.tp2021.cuentacorriente.services.PagoService.PagoException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -28,8 +26,6 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/api/pago")
 @Api(value = "PagoRest", description = "Permite gestionar los pagos de los pedidos.")
 public class PagoRest {
-
-	public static List<Pago> listaPagos;
 
 	@Autowired
 	PagoService pagoServiceImpl;
@@ -124,30 +120,10 @@ public class PagoRest {
 		//TODO ver como implementar, si es necesario, el filtrado por fechas.
 		List<Pago> resultado = new ArrayList<>();
 		try {
-
-			if (id > 0 && !cuit.isBlank()){
-				List<Pago> lista = pagoServiceImpl.getListaPagos();
-				//TODO porque se filtra la lista acá? No debería filtrase en el service?
-				resultado =	lista.stream()
-							.filter(pago -> pago.getCliente().getId().equals(id) || pago.getCliente().getCuit().equals(cuit))
-							.collect(Collectors.toList());
-				return ResponseEntity.ok(resultado);
-				
-			}
-
-			if(id > 0) {
-				resultado = pagoServiceImpl.getListaPagosByIdCliente(id);
-				return ResponseEntity.ok(resultado);
-			}
-
-			if(!cuit.isBlank()) {
-				resultado = pagoServiceImpl.getListaPagosByCuitCliente(cuit);
-				return ResponseEntity.ok(resultado);
-			}
-
-			resultado = pagoServiceImpl.getListaPagos();
-
+			resultado = pagoServiceImpl.getPagosByParams(id, cuit);
 			return ResponseEntity.ok(resultado);
+		}catch (PagoException e) {
+			return ResponseEntity.notFound().build();
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
