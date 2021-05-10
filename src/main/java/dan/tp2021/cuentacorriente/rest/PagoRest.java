@@ -45,7 +45,8 @@ public class PagoRest {
 		if (nuevoPago != null && nuevoPago.getCliente() != null && nuevoPago.getMedio() != null) {
 			
 			try {
-				return pagoServiceImpl.savePago(nuevoPago);
+				Pago guardado = pagoServiceImpl.savePago(nuevoPago);
+				return ResponseEntity.ok(guardado);
 			} catch (Exception e) {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 			}
@@ -61,7 +62,10 @@ public class PagoRest {
 			@ApiResponse(code = 404, message = "El ID no existe") })
 	public ResponseEntity<Pago> deletePagoById(@PathVariable Integer id) {
 		try {
-			return pagoServiceImpl.deletePagoById(id);
+			Pago eliminado = pagoServiceImpl.deletePagoById(id);
+			return ResponseEntity.ok(eliminado);
+		} catch (PagoService.PagoNotFoundException e){
+			return ResponseEntity.notFound().build();
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
@@ -72,11 +76,16 @@ public class PagoRest {
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Pago actualizado correctamente"),
 			@ApiResponse(code = 401, message = "Operacion No autorizada"),
 			@ApiResponse(code = 403, message = "Operacion Prohibida"),
-			@ApiResponse(code = 404, message = "El ID no existe") })
+			@ApiResponse(code = 404, message = "El ID no existe"),
+			@ApiResponse(code = 400, message = "No se recibió ID"),
+			@ApiResponse(code = 500, message = "Error en el servidor")})
 	public ResponseEntity<Pago> updatePago(@RequestBody Pago nuevoPago) {
 		if (nuevoPago.getId() != null) {
 			try {
-				return pagoServiceImpl.savePago(nuevoPago);
+				Pago guardado = pagoServiceImpl.savePago(nuevoPago);
+				return ResponseEntity.ok(guardado);
+			} catch (PagoService.PagoNotFoundException e){
+				return ResponseEntity.notFound().build();
 			} catch (Exception e) {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 			}
@@ -92,7 +101,10 @@ public class PagoRest {
 			@ApiResponse(code = 404, message = "El ID no existe") })
 	public ResponseEntity<Pago> getPagoById(@PathVariable Integer id) {
 		try {
-			return pagoServiceImpl.getPagoById(id);
+			Pago resultado = pagoServiceImpl.getPagoById(id);
+			return ResponseEntity.ok(resultado);
+		} catch (PagoService.PagoNotFoundException e){
+			return ResponseEntity.notFound().build();
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
@@ -112,35 +124,31 @@ public class PagoRest {
 		//TODO ver como implementar, si es necesario, el filtrado por fechas.
 		List<Pago> resultado = new ArrayList<>();
 		try {
-			ResponseEntity<List<Pago>> lista = pagoServiceImpl.getListaPagos();
-			if(lista.getStatusCode().equals(HttpStatus.OK)) {
+
 			if (id > 0 && !cuit.isBlank()){
+				List<Pago> lista = pagoServiceImpl.getListaPagos();
+				//TODO porque se filtra la lista acá? No debería filtrase en el service?
+				resultado =	lista.stream()
+							.filter(pago -> pago.getCliente().getId().equals(id) || pago.getCliente().getCuit().equals(cuit))
+							.collect(Collectors.toList());
+				return ResponseEntity.ok(resultado);
 				
-					resultado =	lista.getBody().stream()
-								.filter(pago -> pago.getCliente().getId().equals(id) || pago.getCliente().getCuit().equals(cuit))
-								.collect(Collectors.toList());
-					return ResponseEntity.ok(resultado);
-				
 			}
-			else {
-				if(id>0) {
-					return pagoServiceImpl.getListaPagosByIdCliente(id);
-				}
-				else {
-					if(!cuit.isBlank()) {
-						return pagoServiceImpl.getListaPagosByCuitCliente(cuit);
-					}
-					else {
-						return lista;
-					}
-				}
+
+			if(id > 0) {
+				resultado = pagoServiceImpl.getListaPagosByIdCliente(id);
+				return ResponseEntity.ok(resultado);
 			}
+
+			if(!cuit.isBlank()) {
+				resultado = pagoServiceImpl.getListaPagosByCuitCliente(cuit);
+				return ResponseEntity.ok(resultado);
 			}
-			else {
-				return ResponseEntity.status(lista.getStatusCode()).build();
-			}
-		}
-		catch (Exception e) {
+
+			resultado = pagoServiceImpl.getListaPagos();
+
+			return ResponseEntity.ok(resultado);
+		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
 		

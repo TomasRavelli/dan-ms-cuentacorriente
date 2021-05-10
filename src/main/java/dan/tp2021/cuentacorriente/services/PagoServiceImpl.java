@@ -1,8 +1,8 @@
 package dan.tp2021.cuentacorriente.services;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import dan.tp2021.cuentacorriente.dao.PagoInMemoryRepository;
 import dan.tp2021.cuentacorriente.domain.Pago;
-import frsf.isi.dan.InMemoryRepository;
 
 @Service
 public class PagoServiceImpl implements PagoService {
@@ -20,70 +19,87 @@ public class PagoServiceImpl implements PagoService {
 	PagoInMemoryRepository inMemoryRepository;
 
 	@Override
-	public ResponseEntity<Pago> savePago(Pago p) {
+	public Pago savePago(Pago p) throws PagoException {
 
 		if(p.getId()!=null) {
 			//Si quiere actualizar un pago, primero me fijo si dicho pago existe mediante su id.
 			if(inMemoryRepository.existsById(p.getId())) {
-				return ResponseEntity.ok(inMemoryRepository.save(p));
+				return inMemoryRepository.save(p);
 			}else {
-				return ResponseEntity.notFound().build();
+				//El pago que se quiere actualizar no existe.
+				throw new PagoNotFoundException("No se eonctró el pago.");
 			}
 		}
-		return ResponseEntity.ok(inMemoryRepository.save(p));
-
-	}
-
-	@Override
-	public ResponseEntity<Pago> deletePagoById(Integer idPago) {
 
 		try {
-			inMemoryRepository.deleteById(idPago);
-			return ResponseEntity.status(HttpStatus.OK).build();
-		} catch (Exception E) {
-			return ResponseEntity.notFound().build();
+			return inMemoryRepository.save(p);
+		} catch (Exception e) {
+			throw new PagoException("Error al guardar el pago: " + e.getMessage());
 		}
 
 	}
 
 	@Override
-	public ResponseEntity<Pago> getPagoById(Integer idPago) {
+	public Pago deletePagoById(Integer idPago) throws PagoException {
 
-		return ResponseEntity.of(inMemoryRepository.findById(idPago));
+		try {
+			Optional<Pago> p = inMemoryRepository.findById(idPago);
+			if(p.isPresent()) {
+				inMemoryRepository.deleteById(idPago);
+				return p.get();
+			}
+		} catch (Exception e) {
+			throw new PagoException("Error al eliminar el pago: " + e.getMessage());
+		}
+
+		//Si llega acá quiere decir que no hubo error (excepción) pero no se encontró el pago para eliminar.
+		throw new PagoNotFoundException("");
+
 	}
 
 	@Override
-	public ResponseEntity<List<Pago>> getListaPagos() {
+	public Pago getPagoById(Integer idPago) throws PagoException {
+
+		Optional<Pago> result =  inMemoryRepository.findById(idPago);
+		if(result.isPresent()) {
+			return result.get();
+		}
+
+		throw new PagoNotFoundException("");
+	}
+
+	@Override
+	public List<Pago> getListaPagos() throws PagoException {
 		List<Pago> resultado = new ArrayList<>();
 		try {
 			inMemoryRepository.findAll().forEach(p -> resultado.add(p));
-		}catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		} catch (Exception e) {
+			throw new PagoException("Error al obtener la lista de pagos: " + e.getMessage());
 		}
-		return ResponseEntity.ok(resultado);
+		return resultado;
 	}
 	
 	@Override
-	public ResponseEntity<List<Pago>> getListaPagosByIdCliente(Integer idCliente){
+	public List<Pago> getListaPagosByIdCliente(Integer idCliente) throws PagoException {
 		List<Pago> resultado = new ArrayList<>();
 		try{
 			inMemoryRepository.findAll().forEach(p -> {if(p.getCliente().getId().equals(idCliente)) resultado.add(p);});
 		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			throw new PagoException("Error al obtener la lista de pagos para el id de cliente " + idCliente + ": " + e.getMessage());
 		}
-		return ResponseEntity.ok(resultado);
+		return resultado;
 	}
 	
 	@Override
-	public ResponseEntity<List<Pago>> getListaPagosByCuitCliente(String cuit){
+	public List<Pago> getListaPagosByCuitCliente(String cuit) throws PagoException {
 		List<Pago> resultado = new ArrayList<>();
 		
 		try{
 			inMemoryRepository.findAll().forEach(p -> {if(p.getCliente().getCuit().equals(cuit)) resultado.add(p);});
 		}catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+			throw new PagoException("Error al obtener la lista de pagos para el cuit de cliente " + cuit + ": " + e.getMessage());
 		}
-		return ResponseEntity.ok(resultado);
+		return resultado;
 	}
 
 }
