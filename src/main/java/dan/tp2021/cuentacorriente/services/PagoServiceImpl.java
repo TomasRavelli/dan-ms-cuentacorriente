@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import dan.tp2021.cuentacorriente.dao.PagoInMemoryRepository;
 import dan.tp2021.cuentacorriente.domain.Pago;
+import dan.tp2021.cuentacorriente.exceptions.pago.PagoException;
+import dan.tp2021.cuentacorriente.exceptions.pago.PagoNotFoundException;
 
 @Service
 public class PagoServiceImpl implements PagoService {

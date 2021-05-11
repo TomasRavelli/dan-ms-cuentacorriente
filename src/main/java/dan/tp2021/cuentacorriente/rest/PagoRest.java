@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import dan.tp2021.cuentacorriente.domain.Pago;
+import dan.tp2021.cuentacorriente.exceptions.pago.PagoNotFoundException;
 import dan.tp2021.cuentacorriente.services.PagoService;
-import dan.tp2021.cuentacorriente.services.PagoService.PagoException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -60,7 +60,7 @@ public class PagoRest {
 		try {
 			Pago eliminado = pagoServiceImpl.deletePagoById(id);
 			return ResponseEntity.ok(eliminado);
-		} catch (PagoService.PagoNotFoundException e){
+		} catch (PagoNotFoundException e){
 			return ResponseEntity.notFound().build();
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -80,7 +80,7 @@ public class PagoRest {
 			try {
 				Pago guardado = pagoServiceImpl.savePago(nuevoPago);
 				return ResponseEntity.ok(guardado);
-			} catch (PagoService.PagoNotFoundException e){
+			} catch (PagoNotFoundException e){
 				return ResponseEntity.notFound().build();
 			} catch (Exception e) {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -99,7 +99,7 @@ public class PagoRest {
 		try {
 			Pago resultado = pagoServiceImpl.getPagoById(id);
 			return ResponseEntity.ok(resultado);
-		} catch (PagoService.PagoNotFoundException e){
+		} catch (PagoNotFoundException e){
 			return ResponseEntity.notFound().build();
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -122,7 +122,7 @@ public class PagoRest {
 		try {
 			resultado = pagoServiceImpl.getPagosByParams(id, cuit);
 			return ResponseEntity.ok(resultado);
-		}catch (PagoException e) {
+		}catch (dan.tp2021.cuentacorriente.exceptions.pago.PagoException e) {
 			return ResponseEntity.notFound().build();
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
