@@ -2,6 +2,9 @@ package dan.tp2021.cuentacorriente.rest;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import dan.tp2021.cuentacorriente.domain.Pago;
+import dan.tp2021.cuentacorriente.exceptions.pago.PagoException;
 import dan.tp2021.cuentacorriente.exceptions.pago.PagoNotFoundException;
 import dan.tp2021.cuentacorriente.services.PagoService;
 import io.swagger.annotations.Api;
@@ -27,6 +31,7 @@ import io.swagger.annotations.ApiResponses;
 @Api(value = "PagoRest", description = "Permite gestionar los pagos de los pedidos.")
 public class PagoRest {
 
+	private static final Logger logger = LoggerFactory.getLogger(PagoRest.class);
 	@Autowired
 	PagoService pagoServiceImpl;
 
@@ -36,17 +41,22 @@ public class PagoRest {
 			@ApiResponse(code = 401, message = "Operacion No autorizada"),
 			@ApiResponse(code = 403, message = "Operacion Prohibida") })
 	public ResponseEntity<Pago> crearNuevoPago(@RequestBody Pago nuevoPago) {
-		
 		//En nuevoPago viene un atributo "type" que utiliza Jackson para poder instancia la clase Abstacta MedioPago
 		if (nuevoPago != null && nuevoPago.getCliente() != null && nuevoPago.getMedio() != null) {
 			
-			try {
+			try {	
 				Pago guardado = pagoServiceImpl.savePago(nuevoPago);
 				return ResponseEntity.ok(guardado);
 			} catch (Exception e) {
+				logger.error("Error al guardar pago. Mensaje: " + e.getMessage());
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 			}
 		}
+		
+		logger.debug("nuevoPago es null? " + (nuevoPago==null));
+		logger.debug("cliente es null? " + (nuevoPago.getCliente()==null));
+		logger.debug("medio de pago es null? " + (nuevoPago.getMedio()==null));
+		
 		return ResponseEntity.badRequest().build();
 	}
 
@@ -86,6 +96,7 @@ public class PagoRest {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 			}
 		}
+		logger.error("id es null: " + (nuevoPago.getId()==null));
 		return ResponseEntity.badRequest().build();
 	}
 
@@ -122,7 +133,7 @@ public class PagoRest {
 		try {
 			resultado = pagoServiceImpl.getPagosByParams(id, cuit);
 			return ResponseEntity.ok(resultado);
-		}catch (dan.tp2021.cuentacorriente.exceptions.pago.PagoException e) {
+		}catch (PagoException e) {
 			return ResponseEntity.notFound().build();
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
