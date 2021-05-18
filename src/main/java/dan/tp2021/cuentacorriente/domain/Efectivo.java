@@ -2,6 +2,7 @@ package dan.tp2021.cuentacorriente.domain;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 

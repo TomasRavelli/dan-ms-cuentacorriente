@@ -26,8 +26,6 @@ public class Pago {
 	@JoinColumn(name = "ID_MEDIOPAGO")
 	private MedioPago medio;
 	
-//	@JsonProperty(access=Access.READ_ONLY) Esto supuestamente tiene un error. https://github.com/FasterXML/jackson-databind/issues/935
-	@JsonIgnoreProperties(value="cliente", allowGetters = true, allowSetters = false)
 	@ManyToOne
 	@JoinColumn(name = "ID_CLIENTE")
 	private Cliente cliente;
