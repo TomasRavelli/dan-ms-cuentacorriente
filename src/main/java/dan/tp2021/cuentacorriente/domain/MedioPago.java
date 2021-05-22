@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 public abstract class MedioPago {
 
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="ID_MEDIOPAGO")
+//	@Column(name="ID_MEDIOPAGO")
 	protected Integer id;
 	protected String observacion;
 	public Integer getId() {

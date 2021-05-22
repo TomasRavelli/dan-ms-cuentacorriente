@@ -17,17 +17,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Pago {
 
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name="ID_PAGO")
+//	@Column(name="ID_PAGO")
 	private Integer id;
 	
 	private Instant fechaPago;
 	
 	@ManyToOne(cascade = CascadeType.PERSIST) //Siempre que se cree un nuevo pago, se va a crear un nuevo medio de pago.
-	@JoinColumn(name = "ID_MEDIOPAGO")
+//	@JoinColumn(name = "ID_MEDIOPAGO")
 	private MedioPago medio;
 	
 	@ManyToOne
-	@JoinColumn(name = "ID_CLIENTE")
+//	@JoinColumn(name = "ID_CLIENTE")
 	private Cliente cliente;
 	
 	public Integer getId() {
