@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import dan.tp2021.cuentacorriente.domain.Pago;
 import frsf.isi.dan.InMemoryRepository;
 
+@Deprecated
 @Repository
 public class PagoInMemoryRepository extends InMemoryRepository<Pago> {
 
