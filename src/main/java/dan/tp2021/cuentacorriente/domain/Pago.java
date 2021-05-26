@@ -22,7 +22,7 @@ public class Pago {
 	
 	private Instant fechaPago;
 	
-	@ManyToOne(cascade = CascadeType.PERSIST) //Siempre que se cree un nuevo pago, se va a crear un nuevo medio de pago.
+	@ManyToOne(cascade = CascadeType.ALL) //Siempre que se cree un nuevo pago, se va a crear un nuevo medio de pago.
 //	@JoinColumn(name = "ID_MEDIOPAGO")
 	private MedioPago medio;
 	

@@ -117,18 +117,20 @@ public class PagoServiceImpl implements PagoService {
 		List<Pago> resultado;
 		try {
 //			inMemoryRepository.findAll().forEach(p -> {if(p.getCliente().getCuit().equals(cuit)) resultado.add(p);});
+			logger.debug("Buscando cliente por cuit: " + cuit);
 			resultado = pagoRepository.findByClienteCuit(cuit);
 		} catch (Exception e) {
 			logger.error("Error al buscar pagos por cuit de cliente. Mensaje de error: " + e.getMessage());
 			throw new PagoException(
 					"Error al obtener la lista de pagos para el cuit de cliente " + cuit + ": " + e.getMessage());
 		}
+		logger.debug("Cantidad de resultados encontrados: " + resultado.size());
 		return resultado;
 	}
 
 	@Override
 	public List<Pago> getPagosByParams(Integer id, String cuit) throws PagoException {
-
+		logger.debug("Entra a buscar pagos por parametros: id = " + id + ", cuit = " + cuit);
 		if (id > 0 && !cuit.isBlank()) {
 			try {
 				return pagoRepository.findByClienteIdOrClienteCuit(id, cuit);
@@ -150,8 +152,9 @@ public class PagoServiceImpl implements PagoService {
 		}
 
 		if (!cuit.isBlank()) {
-
+		
 			try {
+				logger.debug("Entra a buscar pagos solo por cuit de cliente");
 				return this.getListaPagosByCuitCliente(cuit);
 			} catch (Exception e) {
 				logger.error("Error al obtener pagos desde la BD. Mensaje: " + e.getMessage());
