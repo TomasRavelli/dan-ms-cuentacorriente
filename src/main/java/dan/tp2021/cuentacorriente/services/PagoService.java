@@ -12,5 +12,5 @@ public interface PagoService {
 	List<Pago> getListaPagos() throws PagoException;
 	List<Pago> getListaPagosByIdCliente(Integer idCliente) throws PagoException;
 	List<Pago> getListaPagosByCuitCliente(String cuitCliente) throws PagoException;
-	List<Pago> getPagosByParams(Integer idPago, String cuitCliente) throws dan.tp2021.cuentacorriente.exceptions.pago.PagoNotFoundException, PagoException;
+	List<Pago> getPagosByParams(Integer idPago, String cuitCliente) throws PagoException;
 }
