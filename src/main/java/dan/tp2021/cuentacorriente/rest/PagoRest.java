@@ -134,7 +134,8 @@ public class PagoRest {
 			resultado = pagoServiceImpl.getPagosByParams(id, cuit);
 			return ResponseEntity.ok(resultado);
 		}catch (PagoException e) {
-			return ResponseEntity.notFound().build();
+			//TODO ver que erro se puede retornar acá, es un error de base de datos, un 5XX seguro. O sacar este catch
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 		}
